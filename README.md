@@ -1,0 +1,2 @@
+# szcheck
+check info
