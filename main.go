@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"net/smtp"
 	"strings"
-	"test/lib/logger"
+	"szcheck/lib/logger"
 	"time"
 )
 
