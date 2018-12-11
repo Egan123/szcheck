@@ -58,7 +58,7 @@ func main() {
 	checkCount := 1
 
 	var cars Carsslice
-	url := "https://easyride.zuche.com/member/windCarList.do?callback=jQuery17107594033539615033_1543829205606&fromCity=%25E6%25B7%25B1%25E5%259C%25B3&fromCityId=15&toCity=%25E8%25AF%25B7%25E9%2580%2589%25E6%258B%25A9%25E8%25BF%2598%25E8%25BD%25A6%25E5%259F%258E%25E5%25B8%2582&toCityId=&sortBy=price&sort=0&_=1543829311661"
+	url := "https://easyride.zuche.com/member/windCarList.do?callback=jQuery17108992255892326424_1544427397797&toCity=%25E6%25AD%25A6%25E6%25B1%2589&toCityId=20&sortBy=price&sort=0&_=1544427430680"
 	for range time.Tick(10 * time.Second) {
 		if !hasCheckOut {
 			logger.Notice("查询租车信息，当前第", checkCount, "次查询")
@@ -71,18 +71,31 @@ func main() {
 			if err != nil {
 				logger.Notice("ioutil.ReadAll error")
 			}
-			frist := strings.Split(string(body), "(")[1]
-			carStr := strings.Split(string(frist), ")")[0]
-			err = json.Unmarshal([]byte(carStr), &cars)
-			for _, content := range cars.Pages.Contents {
-				if content.ToCity == "武汉" {
-					logger.Notice("找到租车信息")
-					sendEmailTls()
-					hasCheckOut = true
+			fristStrs := strings.Split(string(body), "(")
+			if len(fristStrs) > 1 {
+				frist := fristStrs[1]
+				carStrs := strings.Split(string(frist), ")")
+				if len(carStrs) > 0 {
+					carStr := carStrs[0]
+					err = json.Unmarshal([]byte(carStr), &cars)
+					for _, content := range cars.Pages.Contents {
+						// if content.FromCity == "广州" || content.FromCity == "深圳" {
+						if content.FromCity == "深圳" {
+							logger.Notice("找到租车信息")
+							sendEmailTls()
+							hasCheckOut = true
+						}
+					}
+					if !hasCheckOut {
+						logger.Notice("没有找到对应的租车信息")
+					}
+				} else {
+					logger.Error("数据查询有误")
+					logger.Notice(string(body))
 				}
-			}
-			if !hasCheckOut {
-				logger.Notice("没有找到对应的租车信息")
+			} else {
+				logger.Error("数据查询有误")
+				logger.Notice(string(body))
 			}
 		} else {
 			logger.Notice("已找到租车信息")
